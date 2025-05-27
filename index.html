@@ -1,21 +1,30 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Cube Demo</title>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
+  <title>3D Cube & Snake Launcher</n  <style>
+    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    #cube-container { position: absolute; top: 0; left: 0; width: 100%; height: 80%; }
+    #controls { position: absolute; bottom: 20px; width: 100%; text-align: center; }
+    button { padding: 10px 20px; font-size: 1rem; }
   </style>
 </head>
 <body>
+  <div id="cube-container"></div>
+  <div id="controls">
+    <button onclick="window.location.href='snake.html'">Play Snake</button>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script>
+    // Three.js rotating cube
+    const container = document.getElementById('cube-container');
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight * 0.8);
+    container.appendChild(renderer.domElement);
 
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
@@ -31,6 +40,13 @@
       renderer.render(scene, camera);
     }
     animate();
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / (window.innerHeight * 0.8);
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight * 0.8);
+    });
   </script>
 </body>
 </html>
