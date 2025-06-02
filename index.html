@@ -1,279 +1,73 @@
-<!DOCTYPE html>
+---
+layout: default
+title: Portfolio Hub
+---
 
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio Hub</title>
+<section class="hero">
+    <div class="hero-content">
+        <h1 id="heroTitle">Welcome to My Portfolio</h1>
+        <p id="heroDescription">Discover my latest projects, experiments, and creative explorations in web development, design, and technology.</p>
+        <a href="#projects" class="cta-button">
+            <span>Explore Work</span>
+            <span>→</span>
+        </a>
+    </div>
+</section>
 
-```
-<!--
-  -------------------------------------------------------------------
-  Collage‑style background of project screenshots
-  -------------------------------------------------------------------
-  ▸   ✂  Drop new images into /images then add their filenames in
-  ▸   screenshots[]  (down in the script section) – refresh and the
-      collage updates automatically.
-  ▸   Each image is positioned in a loose grid and given a very low
-      opacity + blend mode, so foreground content remains readable
-      while the whole page keeps a colourful, dynamic "wall of work"
-      vibe – similar to your PPT example slides 1 & 3.
--->
-
-<style>
-    /* ---- CSS RESET ------------------------------------------------ */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    /* ---- DESIGN TOKENS -------------------------------------------- */
-    :root {
-        --bg-primary: #0a0a0a;
-        --bg-secondary: #111;
-        --bg-tertiary: #1a1a1a;
-        --text-primary: #fff;
-        --text-secondary: #b0b0b0;
-        --accent: #00d4ff;
-        --accent-hover: #00b8e6;
-        --border: #333;
-        --shadow: rgba(0, 0, 0, 0.3);
-        --glow: rgba(0, 212, 255, 0.3);
-    }
-
-    body {
-        font-family: "Inter", system-ui, sans-serif;
-        background: var(--bg-primary);
-        color: var(--text-primary);
-        line-height: 1.6;
-        overflow-x: hidden;
-    }
-
-    /* ===============================================================
-       𝗖𝗢𝗟𝗟𝗔𝗚𝗘 𝗕𝗔𝗖𝗞𝗚𝗥𝗢𝗨𝗡𝗗
-       A stack of <img> elements is injected by JS.  Each one floats
-       slowly and is barely visible, creating motion & texture while
-       keeping the page legible.
-    =============================================================== */
-    .bg-collage {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: -1; /* behind everything */
-        filter: brightness(0.55) saturate(1.2);
-    }
-
-    .bg-collage img {
-        position: absolute;
-        width: 22vw;               /* responsive tile size */
-        max-width: 260px;
-        aspect-ratio: 16/9;
-        object-fit: cover;
-        border-radius: 8px;
-        opacity: 0.13;
-        mix-blend-mode: screen;
-        transition: opacity 0.6s ease;
-        animation: drift 36s ease-in-out infinite alternate;
-    }
-
-    @keyframes drift {
-        0%   { transform: translateY(-8px) scale(1);   }
-        50%  { transform: translateY( 8px) scale(1.04); }
-        100% { transform: translateY(-8px) scale(1);   }
-    }
-
-    /* ---- HEADER --------------------------------------------------- */
-    header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        padding: 1rem 2rem;
-        backdrop-filter: blur(18px);
-        background: rgba(10, 10, 10, 0.55);
-        border-bottom: 1px solid var(--border);
-        z-index: 10;
-    }
-
-    nav {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .logo {
-        font-size: 1.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--accent), #ff6b6b);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    /* ---- HERO ----------------------------------------------------- */
-    main {
-        margin-top: 80px;
-    }
-
-    .hero {
-        min-height: 60vh;
-        display: grid;
-        place-items: center;
-        padding: 2rem;
-        text-align: center;
-    }
-
-    .hero h1 {
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        font-weight: 800;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, var(--text-primary), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-        color: var(--text-secondary);
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-    }
-
-    .cta-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1rem 2rem;
-        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-        color: #fff;
-        border-radius: 40px;
-        font-weight: 600;
-        text-decoration: none;
-        box-shadow: 0 10px 30px var(--glow);
-    }
-
-    /* ---- PROJECTS GRID ------------------------------------------- */
-    .projects {
-        padding: 4rem 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .projects-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 2rem;
-    }
-
-    .project-card {
-        background: var(--bg-secondary);
-        padding: 2rem;
-        border-radius: 18px;
-        border: 1px solid var(--border);
-        box-shadow: 0 10px 25px var(--shadow);
-        transition: transform 0.3s ease;
-    }
-
-    .project-card:hover { transform: translateY(-6px); }
-
-    /* ---- FOOTER --------------------------------------------------- */
-    footer {
-        text-align: center;
-        padding: 2rem;
-        color: var(--text-secondary);
-    }
-</style>
-```
-
-</head>
-<body>
-    <!-- Collage background container -->
-    <div class="bg-collage" aria-hidden="true"></div>
-
-```
-<header>
-    <nav>
-        <div class="logo">Portfolio</div>
-    </nav>
-</header>
-
-<main>
-    <section class="hero">
-        <div>
-            <h1>Welcome to My Portfolio</h1>
-            <p>Discover my latest projects, experiments, and creative explorations in web development, design, and technology.</p>
-            <a href="#projects" class="cta-button">Explore&nbsp;Work&nbsp;→</a>
+<section class="projects" id="projects">
+    <h2 class="section-title" id="sectionTitle">Featured Projects</h2>
+    <div class="projects-grid" id="projectsGrid">
+        <!-- Example project cards - replace with your actual projects -->
+        <div class="project-card">
+            <h3>Project One</h3>
+            <p>A sophisticated web application built with modern technologies. Features responsive design, interactive elements, and seamless user experience.</p>
+            <div class="project-links">
+                <a href="#" class="project-link">
+                    <span>🔗</span>
+                    <span>Live Demo</span>
+                </a>
+                <a href="#" class="project-link">
+                    <span>📁</span>
+                    <span>Source Code</span>
+                </a>
+            </div>
         </div>
-    </section>
 
-    <section id="projects" class="projects">
-        <h2 class="section-title">Featured Projects</h2>
-        <div class="projects-grid" id="projectsGrid">
-            <!-- sample cards -->
-            <div class="project-card"><h3>Project One</h3><p>Short description.</p></div>
-            <div class="project-card"><h3>Project Two</h3><p>Short description.</p></div>
-            <div class="project-card"><h3>Project Three</h3><p>Short description.</p></div>
+        <div class="project-card">
+            <h3>Project Two</h3>
+            <p>An innovative solution combining AI and web technologies. Demonstrates advanced problem-solving skills and creative implementation.</p>
+            <div class="project-links">
+                <a href="#" class="project-link">
+                    <span>🔗</span>
+                    <span>Live Demo</span>
+                </a>
+                <a href="#" class="project-link">
+                    <span>📁</span>
+                    <span>Source Code</span>
+                </a>
+            </div>
         </div>
-    </section>
-</main>
 
-<footer>© 2024 Portfolio Hub</footer>
+        <div class="project-card">
+            <h3>Project Three</h3>
+            <p>A creative exploration in interactive design and user interface development. Showcases attention to detail and modern design principles.</p>
+            <div class="project-links">
+                <a href="#" class="project-link">
+                    <span>🔗</span>
+                    <span>Live Demo</span>
+                </a>
+                <a href="#" class="project-link">
+                    <span>📁</span>
+                    <span>Source Code</span>
+                </a>
+            </div>
+        </div>
+    </div>
 
-<script>
-    /* =============================================================
-       Populate collage with screenshots
-    ============================================================= */
-    const screenshots = [
-        // 👉  Add / remove filenames here – the collage will rebuild.
-        "images/project1.jpg",
-        "images/project2.jpg",
-        "images/project3.jpg",
-        "images/project4.jpg",
-        "images/project5.jpg",
-        "images/project6.jpg",
-        "images/project7.jpg",
-        "images/project8.jpg"
-    ];
-
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    function populateCollage() {
-        const container = document.querySelector(".bg-collage");
-        container.innerHTML = ""; // reset
-        const shuffled = shuffle([...screenshots]);
-        const cols = 5; // number of columns
-        const rows = Math.ceil(shuffled.length / cols);
-        const vwStep = 100 / cols;
-        const vhStep = 100 / rows;
-
-        shuffled.forEach((src, i) => {
-            const img = document.createElement("img");
-            img.src = src;
-            img.alt = "project screenshot";
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            // small random offsets for a less rigid look
-            const xJitter = (Math.random() - 0.5) * vwStep * 0.2;
-            const yJitter = (Math.random() - 0.5) * vhStep * 0.2;
-            img.style.left = `calc(${col * vwStep}vw + ${xJitter}px)`;
-            img.style.top  = `calc(${row * vhStep}vh + ${yJitter}px)`;
-            container.appendChild(img);
-        });
-    }
-
-    populateCollage();
-</script>
-```
-
-</body>
-</html>
+    <div class="add-projects">
+        <a href="#" class="add-btn">
+            <span>+</span>
+            <span>Add More Projects</span>
+        </a>
+    </div>
+</section>
