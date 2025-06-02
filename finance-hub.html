@@ -404,26 +404,50 @@
         }
 
         async function fetchStockData(symbol) {
-            // Simulate API call with realistic mock data
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const mockData = {
-                        symbol: symbol,
-                        price: (Math.random() * 500 + 50).toFixed(2),
-                        change: (Math.random() * 20 - 10).toFixed(2),
-                        changePercent: (Math.random() * 10 - 5).toFixed(2),
-                        open: (Math.random() * 500 + 50).toFixed(2),
-                        volume: Math.floor(Math.random() * 100000000).toLocaleString(),
-                        marketCap: (Math.random() * 2000 + 100).toFixed(1) + 'B',
-                        dayHigh: (Math.random() * 500 + 50).toFixed(2),
-                        dayLow: (Math.random() * 500 + 50).toFixed(2),
-                        yearHigh: (Math.random() * 600 + 100).toFixed(2),
-                        yearLow: (Math.random() * 200 + 20).toFixed(2),
-                        peRatio: (Math.random() * 50 + 5).toFixed(2)
+            const API_KEY = 'FHVNBM585P8BDFG0';
+            const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data['Global Quote'] && Object.keys(data['Global Quote']).length > 0) {
+                    const quote = data['Global Quote'];
+                    return {
+                        symbol: quote['01. symbol'],
+                        price: parseFloat(quote['05. price']).toFixed(2),
+                        change: parseFloat(quote['09. change']).toFixed(2),
+                        changePercent: parseFloat(quote['10. change percent'].replace('%', '')),
+                        open: parseFloat(quote['02. open']).toFixed(2),
+                        dayHigh: parseFloat(quote['03. high']).toFixed(2),
+                        dayLow: parseFloat(quote['04. low']).toFixed(2),
+                        volume: parseInt(quote['06. volume']).toLocaleString(),
+                        marketCap: 'N/A', // Not available in this API endpoint
+                        yearHigh: 'N/A', // Not available in this API endpoint
+                        yearLow: 'N/A', // Not available in this API endpoint
+                        peRatio: 'N/A' // Not available in this API endpoint
                     };
-                    resolve(mockData);
-                }, 500);
-            });
+                } else {
+                    throw new Error('Invalid response or API limit reached');
+                }
+            } catch (err) {
+                console.error('API Error:', err);
+                // Fallback to mock data if API fails
+                return {
+                    symbol: symbol,
+                    price: (Math.random() * 500 + 50).toFixed(2),
+                    change: (Math.random() * 20 - 10).toFixed(2),
+                    changePercent: (Math.random() * 10 - 5).toFixed(2),
+                    open: (Math.random() * 500 + 50).toFixed(2),
+                    volume: Math.floor(Math.random() * 100000000).toLocaleString(),
+                    marketCap: (Math.random() * 2000 + 100).toFixed(1) + 'B',
+                    dayHigh: (Math.random() * 500 + 50).toFixed(2),
+                    dayLow: (Math.random() * 500 + 50).toFixed(2),
+                    yearHigh: (Math.random() * 600 + 100).toFixed(2),
+                    yearLow: (Math.random() * 200 + 20).toFixed(2),
+                    peRatio: (Math.random() * 50 + 5).toFixed(2)
+                };
+            }
         }
 
         async function addStock() {
