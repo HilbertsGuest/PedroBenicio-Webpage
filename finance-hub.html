@@ -1,1 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #1e1e1e; /* Slightly lighter than pure black for depth */
+            --primary-text-color: #e0e0e0;
+            --secondary-text-color: #b0b0b0;
+            --accent-color: #4CAF50; /* Green for positive, chart */
+            --accent-color-hover: #66BB6A;
+            --border-color: #333333;
+            --surface-color: #2a2a2a; /* For cards, sidebar */
+            --button-bg-color: #333333;
+            --button-text-color: #e0e0e0;
+            --button-active-bg-color: #555555;
+            --positive-change-color: #4CAF50;
+            --negative-change-color: #F44336;
+            --input-bg-color: #333;
+            --input-border-color: #555;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--primary-text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--surface-color);
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sidebar-controls input[type="text"],
+        .sidebar-controls input[type="text"]::placeholder {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: var(--input-bg-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 4px;
+            color: var(--primary-text-color);
+            font-size: 14px;
+        }
+        .sidebar-controls button {
+            padding: 10px 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar-controls button:hover {
+            background-color: var(--accent-color-hover);
+        }
+        .add-group-button {
+            background-color: var(--button-bg-color) !important;
+            color: var(--button-text-color) !important;
+        }
+         .add-group-button:hover {
+            background-color: var(--button-active-bg-color) !important;
+        }
+
+
+        #stock-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        #stock-list li {
+            padding: 12px 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: grab;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            font-size: 15px;
+            transition: background-color 0.2s ease;
+        }
+        #stock-list li:hover {
+            background-color: #383838;
+        }
+        #stock-list li.dragging {
+            opacity: 0.5;
+        }
+        #stock-list li.group-label {
+            background-color: var(--surface-color);
+            font-weight: bold;
+            color: var(--accent-color);
+            border-left: 3px solid var(--accent-color);
+            cursor: grab; /* Keep grab cursor consistent */
+        }
+        #stock-list li.active-stock {
+            background-color: #3a3a3a;
+            border-left: 3px solid var(--accent-color);
+        }
+
+
+        .main-content {
+            flex-grow: 1;
+            padding: 25px 40px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .stock-header {
+            margin-bottom: 10px;
+        }
+        .stock-header h1 {
+            font-size: 32px;
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .stock-header h1 .company-name {
+            font-size: 20px;
+            color: var(--secondary-text-color);
+            margin-left: 10px;
+            font-weight: normal;
+        }
+
+        .price-section {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .price-change {
+            font-size: 18px;
+            margin-left: 10px;
+        }
+        .price-change.positive { color: var(--positive-change-color); }
+        .price-change.negative { color: var(--negative-change-color); }
+
+        .after-hours {
+            font-size: 14px;
+            color: var(--secondary-text-color);
+            margin-top: 5px;
+        }
+
+        .chart-controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 5px;
+        }
+
+        .chart-controls button {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .chart-controls button:hover {
+            background-color: #454545;
+        }
+        .chart-controls button.active {
+            background-color: var(--button-active-bg-color);
+            color: var(--primary-text-color);
+            border: 1px solid #777;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 350px; /* Adjusted height */
+            margin-bottom: 30px;
+        }
+
+        .stock-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px 25px; /* row-gap column-gap */
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        .detail-item .label { color: var(--secondary-text-color); }
+        .detail-item .value { color: var(--primary-text-color); font-weight: 500; }
+
+        .market-summary-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--secondary-text-color);
+            margin-bottom: 20px;
+        }
+        .market-summary-text strong {
+            color: var(--primary-text-color);
+        }
+        .market-summary-text .source-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            margin-left: 8px;
+            font-size: 12px;
+        }
+        .market-summary-text .source-links a:hover {
+            text-decoration: underline;
+        }
+
+        .external-links {
+            font-size: 14px;
+        }
+        .external-links strong {
+            color: var(--primary-text-color);
+        }
+        .external-links ul {
+            list-style: disc;
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        .external-links li a {
+            color: var(--accent-color-hover);
+            text-decoration: none;
+        }
+        .external-links li a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-controls">
+                <input type="text" id="stock-symbol-input" placeholder="Add Stock (e.g. GOOG)">
+                <button id="add-stock-button" title="Add Stock">+</button>
+                <button id="add-group-label-button" class="add-group-button" title="Add Group Label">G</button>
+            </div>
+            <ul id="stock-list">
+                </ul>
+        </aside>
+        <main class="main-content">
+            <div class="stock-header">
+                <h1 id="stock-symbol-title">AAPL <span class="company-name" id="company-name">Apple Inc.</span></h1>
+                <div>
+                    <span class="price-section" id="current-price">$201.70</span>
+                    <span class="price-change positive" id="price-change">+$2.81 (+1.41%)</span>
+                </div>
+                <div class="after-hours" id="after-hours-price">Nachbörslich: $202.01 <span class="positive">+$0.31 (+0.15%)</span></div>
+            </div>
+
+            <div class="chart-controls">
+                <button data-range="1D">1D</button>
+                <button data-range="5D">5D</button>
+                <button data-range="1M" class="active">1M</button>
+                <button data-range="6M">6M</button>
+                <button data-range="YTD">YTD</button>
+                <button data-range="1Y">1Y</button>
+                <button data-range="5Y">5Y</button>
+                <button data-range="MAX">MAX</button>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="stockChart"></canvas>
+            </div>
+
+            <div class="stock-details-grid">
+                <div class="detail-item"><span class="label">Öffnen</span><span class="value" id="detail-open">200.28</span></div>
+                <div class="detail-item"><span class="label">Volumen</span><span class="value" id="detail-volume">35,3 Mio.</span></div>
+                <div class="detail-item"><span class="label">Marktkapitalisierung</span><span class="value" id="detail-marketcap">3,28 Bio.</span></div>
+
+                <div class="detail-item"><span class="label">Tagestief</span><span class="value" id="detail-daylow">199.05</span></div>
+                <div class="detail-item"><span class="label">Jahrestief</span><span class="value" id="detail-52wlow">169.21</span></div>
+                <div class="detail-item"><span class="label">EPS (TTM)</span><span class="value" id="detail-eps">6.42</span></div>
+
+                <div class="detail-item"><span class="label">Tageshoch</span><span class="value" id="detail-dayhigh">202.41</span></div>
+                <div class="detail-item"><span class="label">Jahreshoch</span><span class="value" id="detail-52whigh">260.10</span></div>
+                <div class="detail-item"><span class="label">KGV</span><span class="value" id="detail-pe">33.72</span></div>
+            </div>
+
+            <p class="market-summary-text">
+                As of June 2, 2025, AAPL is trading at <strong>$201.70</strong>, reflecting a modest daily gain of <strong>0.86%</strong>.
+                The stock has experienced a 52-week range between <strong>$169.21</strong> and <strong>$260.10</strong>,
+                with a market capitalization of approximately <strong>$3.28 trillion</strong>.
+                <span class="source-links">
+                    <a href="#" target="_blank">Finviz</a>
+                    <a href="#" target="_blank">MarketWatch</a>
+                    +2
+                </span>
+            </p>
+
+            <div class="external-links">
+                <strong>For more detailed and interactive charts, you can explore the following platforms:</strong>
+                <ul>
+                    <li><a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a></li>
+                    <li><a href="https://www.tradingview.com" target="_blank">TradingView</a></li>
+                    <li><a href="https://www.marketwatch.com" target="_blank">MarketWatch</a></li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stockSymbolInput = document.getElementById('stock-symbol-input');
+            const addStockButton = document.getElementById('add-stock-button');
+            const addGroupLabelButton = document.getElementById('add-group-label-button');
+            const stockList = document.getElementById('stock-list');
+
+            const stockSymbolTitle = document.getElementById('stock-symbol-title');
+            const companyNameDisplay = document.getElementById('company-name');
+            const currentPriceDisplay = document.getElementById('current-price');
+            const priceChangeDisplay = document.getElementById('price-change');
+            const afterHoursDisplay = document.getElementById('after-hours-price');
+
+            const detailOpen = document.getElementById('detail-open');
+            const detailVolume = document.getElementById('detail-volume');
+            const detailMarketCap = document.getElementById('detail-marketcap');
+            const detailDayLow = document.getElementById('detail-daylow');
+            const detail52WLow = document.getElementById('detail-52wlow');
+            const detailEps = document.getElementById('detail-eps');
+            const detailDayHigh = document.getElementById('detail-dayhigh');
+            const detail52WHigh = document.getElementById('detail-52whigh');
+            const detailPe = document.getElementById('detail-pe');
+
+            const chartControls = document.querySelector('.chart-controls');
+
+            let chart;
+            let sidebarStocks = []; // { type: 'stock'/'group', id: 'AAPL', name: 'Apple Inc.' } or { type: 'group', id: 'Group 1', name: 'Group 1' }
+            let currentlyDisplayedStock = 'AAPL'; // Default stock
+
+            // Mock data for AAPL
+            const aaplMockData = {
+                symbol: 'AAPL',
+                companyName: 'Apple Inc.',
+                price: 201.70,
+                change: 2.81,
+                changePercent: 1.41,
+                afterHoursPrice: 202.01,
+                afterHoursChange: 0.31,
+                afterHoursChangePercent: 0.15,
+                open: 200.28,
+                volume: '35,3 Mio.',
+                marketCap: '3,28 Bio.',
+                dayLow: 199.05,
+                yearLow: 169.21,
+                eps: 6.42,
+                dayHigh: 202.41,
+                yearHigh: 260.10,
+                pe: 33.72,
+                historical: { // Mock 1M data for chart
+                    '1M': {
+                        labels: ['May 1', 'May 3', 'May 5', 'May 7', 'May 9','May 11', 'May 13', 'May 15', 'May 17', 'May 19', 'May 21','May 23', 'May 25', 'May 27', 'May 29', 'May 31', 'Jun 2'],
+                        data: [198, 197, 197.5, 196, 199, 200, 205, 212, 210, 209, 208, 200, 195, 198, 200, 201, 201.70]
+                    },
+                    // Add more mock data for 1D, 5D, etc. if needed for full functionality
+                    '5D': { labels: ['Day -4', 'Day -3', 'Day -2', 'Day -1', 'Today'], data: [199, 200, 198, 201, 201.70]},
+                    '1D': { labels: ['9:30', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'], data: [200.28, 201.00, 201.50, 200.80, 201.20, 202.00, 201.50, 201.70]},
+                    // Placeholder for other ranges
+                    '6M': { labels: Array(6).fill(0).map((_,i)=>`Month ${i+1}`), data: Array(6).fill(0).map(()=>180 + Math.random()*40) },
+                    'YTD': { labels: Array(5).fill(0).map((_,i)=>`Month ${i+1}`), data: Array(5).fill(0).map(()=>170 + Math.random()*50) },
+                    '1Y': { labels: Array(12).fill(0).map((_,i)=>`Month ${i+1}`), data: Array(12).fill(0).map(()=>160 + Math.random()*60) },
+                    '5Y': { labels: Array(5).fill(0).map((_,i)=>`Year ${i+1}`), data: Array(5).fill(0).map(()=>100 + Math.random()*100) },
+                    'MAX': { labels: Array(10).fill(0).map((_,i)=>`Year ${i+1}`), data: Array(10).fill(0).map(()=>50 + Math.random()*150) },
+                }
+            };
+
+            // Function to simulate fetching stock data
+            async function fetchStockData(symbol, timeRange = '1M') {
+                console.log(`Fetching data for ${symbol}, range: ${timeRange}`);
+                // In a real app, this would be an API call.
+                // For now, return AAPL mock data if symbol is AAPL or a generic one.
+                if (symbol.toUpperCase() === 'AAPL') {
+                    return { ...aaplMockData, currentChartData: aaplMockData.historical[timeRange] || aaplMockData.historical['1M'] };
+                }
+                // Placeholder for other stocks
+                return {
+                    symbol: symbol.toUpperCase(),
+                    companyName: `${symbol.toUpperCase()} Company`,
+                    price: (Math.random() * 500).toFixed(2),
+                    change: (Math.random() * 10 - 5).toFixed(2),
+                    changePercent: (Math.random() * 2 - 1).toFixed(2),
+                    afterHoursPrice: (Math.random() * 500).toFixed(2),
+                    afterHoursChange: (Math.random() * 2 - 1).toFixed(2),
+                    afterHoursChangePercent: (Math.random() * 0.5 - 0.25).toFixed(2),
+                    open: (Math.random() * 500).toFixed(2),
+                    volume: `${(Math.random() * 100).toFixed(1)} Mio.`,
+                    marketCap: `${(Math.random() * 5).toFixed(2)} Bio.`,
+                    dayLow: (Math.random() * 480).toFixed(2),
+                    yearLow: (Math.random() * 400).toFixed(2),
+                    eps: (Math.random() * 10).toFixed(2),
+                    dayHigh: (Math.random() * 520).toFixed(2),
+                    yearHigh: (Math.random() * 600).toFixed(2),
+                    pe: (Math.random() * 50).toFixed(2),
+                    currentChartData: aaplMockData.historical[timeRange] || aaplMockData.historical['1M'] // Use AAPL chart data for demo
+                };
+            }
+
+            function updateMainContent(data) {
+                stockSymbolTitle.innerHTML = `${data.symbol} <span class="company-name">${data.companyName}</span>`;
+                companyNameDisplay.textContent = data.companyName;
+                currentPriceDisplay.textContent = `$${data.price.toFixed(2)}`;
+                
+                const changeClass = data.change >= 0 ? 'positive' : 'negative';
+                const changeSign = data.change >= 0 ? '+' : '';
+                priceChangeDisplay.innerHTML = `<span class="${changeClass}">${changeSign}$${Math.abs(data.change).toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)</span>`;
+
+                const ahChangeClass = data.afterHoursChange >= 0 ? 'positive' : 'negative';
+                const ahChangeSign = data.afterHoursChange >= 0 ? '+' : '';
+                afterHoursDisplay.innerHTML = `Nachbörslich: $${data.afterHoursPrice.toFixed(2)} <span class="${ahChangeClass}">${ahChangeSign}$${Math.abs(data.afterHoursChange).toFixed(2)} (${ahChangeSign}${data.afterHoursChangePercent.toFixed(2)}%)</span>`;
+
+                detailOpen.textContent = data.open.toFixed(2);
+                detailVolume.textContent = data.volume;
+                detailMarketCap.textContent = data.marketCap;
+                detailDayLow.textContent = data.dayLow.toFixed(2);
+                detail52WLow.textContent = data.yearLow.toFixed(2);
+                detailEps.textContent = data.eps.toFixed(2);
+                detailDayHigh.textContent = data.dayHigh.toFixed(2);
+                detail52WHigh.textContent = data.yearHigh.toFixed(2);
+                detailPe.textContent = data.pe.toFixed(2);
+
+                updateChart(data.currentChartData, data.change >=0);
+                currentlyDisplayedStock = data.symbol;
+                highlightActiveStockInSidebar();
+            }
+
+            function createChart(chartData, isPositive) {
+                const ctx = document.getElementById('stockChart').getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+                if(isPositive){
+                    gradient.addColorStop(0, 'rgba(75, 192, 192, 0.6)');
+                    gradient.addColorStop(1, 'rgba(75, 192, 192, 0.05)');
+                } else {
+                    gradient.addColorStop(0, 'rgba(255, 99, 132, 0.6)');
+                    gradient.addColorStop(1, 'rgba(255, 99, 132, 0.05)');
+                }
+
+
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Price',
+                            data: chartData.data,
+                            borderColor: isPositive ? 'rgba(75, 192, 192, 1)' : 'rgba(255,99,132,1)',
+                            backgroundColor: gradient,
+                            borderWidth: 2,
+                            pointRadius: 0, // No points on line
+                            tension: 0.1, // Smoothens the line
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(224, 224, 224, 0.1)'},
+                                ticks: { color: 'var(--secondary-text-color)'}
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: 'var(--secondary-text-color)', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            function updateChart(chartData, isPositive) {
+                if (!chartData || !chartData.labels || !chartData.data) {
+                    console.error("Chart data is invalid:", chartData);
+                    // Display a message or clear the chart
+                    if(chart) {
+                        chart.data.labels = [];
+                        chart.data.datasets[0].data = [];
+                        chart.update();
+                    }
+                    return;
+                }
+
+                if (chart) {
+                    chart.data.labels = chartData.labels;
+                    chart.data.datasets[0].data = chartData.data;
+                    const newBorderColor = isPositive ? 'rgba(75, 192, 192, 1)' : 'rgba(255,99,132,1)';
+                    const gradient = chart.ctx.createLinearGradient(0, 0, 0, 350);
+                     if(isPositive){
+                        gradient.addColorStop(0, 'rgba(75, 192, 192, 0.6)');
+                        gradient.addColorStop(1, 'rgba(75, 192, 192, 0.05)');
+                    } else {
+                        gradient.addColorStop(0, 'rgba(255, 99, 132, 0.6)');
+                        gradient.addColorStop(1, 'rgba(255, 99, 132, 0.05)');
+                    }
+                    chart.data.datasets[0].borderColor = newBorderColor;
+                    chart.data.datasets[0].backgroundColor = gradient;
+                    chart.update();
+                } else {
+                    createChart(chartData, isPositive);
+                }
+            }
+
+            function renderSidebar() {
+                stockList.innerHTML = ''; // Clear existing items
+                sidebarStocks.forEach(item => {
+                    const li = document.createElement('li');
+                    li.setAttribute('draggable', true);
+                    li.dataset.id = item.id;
+                    li.dataset.type = item.type;
+
+                    if (item.type === 'stock') {
+                        li.textContent = `${item.id} - ${item.name}`;
+                        if (item.id === currentlyDisplayedStock) {
+                            li.classList.add('active-stock');
+                        }
+                        li.addEventListener('click', () => {
+                            loadStockData(item.id);
+                        });
+                    } else if (item.type === 'group') {
+                        li.textContent = item.name;
+                        li.classList.add('group-label');
+                    }
+                    
+                    li.addEventListener('dragstart', handleDragStart);
+                    li.addEventListener('dragover', handleDragOver);
+                    li.addEventListener('drop', handleDrop);
+                    li.addEventListener('dragend', handleDragEnd);
+
+                    stockList.appendChild(li);
+                });
+                saveSidebarState();
+            }
+            
+            function highlightActiveStockInSidebar() {
+                document.querySelectorAll('#stock-list li').forEach(li => {
+                    li.classList.remove('active-stock');
+                    if (li.dataset.type === 'stock' && li.dataset.id === currentlyDisplayedStock) {
+                        li.classList.add('active-stock');
+                    }
+                });
+            }
+
+            async function loadStockData(symbol, timeRange = '1M') {
+                const data = await fetchStockData(symbol, timeRange);
+                if (data) {
+                    updateMainContent(data);
+                }
+            }
+            
+            addStockButton.addEventListener('click', () => {
+                const symbol = stockSymbolInput.value.trim().toUpperCase();
+                if (symbol && !sidebarStocks.find(s => s.id === symbol && s.type === 'stock')) {
+                    // For demo, new stocks will use placeholder name, actual API would fetch company name
+                    const newStock = { type: 'stock', id: symbol, name: `${symbol} Co.` }; 
+                    sidebarStocks.push(newStock);
+                    renderSidebar();
+                    loadStockData(symbol); // Load the newly added stock
+                    stockSymbolInput.value = '';
+                } else if (!symbol) {
+                    alert("Please enter a stock symbol.");
+                } else {
+                    alert("Stock already in list.");
+                }
+            });
+
+            addGroupLabelButton.addEventListener('click', () => {
+                const groupName = prompt("Enter group label name:", `My Group ${sidebarStocks.filter(i=>i.type==='group').length + 1}`);
+                if (groupName && groupName.trim() !== "") {
+                    const newGroup = { type: 'group', id: `group-${Date.now()}`, name: groupName.trim() };
+                    sidebarStocks.push(newGroup);
+                    renderSidebar();
+                }
+            });
+
+            stockSymbolInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addStockButton.click();
+                }
+            });
+
+
+            chartControls.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const range = e.target.dataset.range;
+                    if (range && currentlyDisplayedStock) {
+                        loadStockData(currentlyDisplayedStock, range);
+                        // Update active button style
+                        chartControls.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                    }
+                }
+            });
+
+            // Drag and Drop for Sidebar
+            let draggedItem = null;
+
+            function handleDragStart(e) {
+                draggedItem = e.target;
+                setTimeout(() => e.target.classList.add('dragging'), 0);
+            }
+
+            function handleDragEnd(e) {
+                draggedItem.classList.remove('dragging');
+                draggedItem = null;
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(stockList, e.clientY);
+                const currentDragging = document.querySelector('.dragging');
+                if (currentDragging) {
+                    if (afterElement == null) {
+                        stockList.appendChild(currentDragging);
+                    } else {
+                        stockList.insertBefore(currentDragging, afterElement);
+                    }
+                }
+            }
+            
+            function handleDrop(e) {
+                e.preventDefault(); // Prevent default drop behavior
+                 // Update sidebarStocks array based on new DOM order
+                const newOrder = [];
+                stockList.querySelectorAll('li').forEach(li => {
+                    const id = li.dataset.id;
+                    const item = sidebarStocks.find(s => s.id === id);
+                    if(item) newOrder.push(item);
+                });
+                sidebarStocks = newOrder;
+                saveSidebarState(); // Persist the new order
+                // No need to call renderSidebar() here if DOM is already updated by dragOver
+            }
+
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+            
+            function saveSidebarState() {
+                localStorage.setItem('sidebarStocks', JSON.stringify(sidebarStocks));
+                localStorage.setItem('currentlyDisplayedStock', currentlyDisplayedStock);
+            }
+
+            function loadSidebarState() {
+                const storedStocks = localStorage.getItem('sidebarStocks');
+                const storedCurrentStock = localStorage.getItem('currentlyDisplayedStock');
+                if (storedStocks) {
+                    sidebarStocks = JSON.parse(storedStocks);
+                } else {
+                    // Default initial stock if nothing in local storage
+                    sidebarStocks = [{ type: 'stock', id: 'AAPL', name: 'Apple Inc.' }];
+                }
+                
+                if(storedCurrentStock){
+                    currentlyDisplayedStock = storedCurrentStock;
+                } else if (sidebarStocks.some(s => s.type === 'stock' && s.id === 'AAPL')) {
+                     currentlyDisplayedStock = 'AAPL';
+                } else if (sidebarStocks.find(s => s.type === 'stock')) {
+                    currentlyDisplayedStock = sidebarStocks.find(s => s.type === 'stock').id;
+                } else {
+                    currentlyDisplayedStock = null; // No stock to display
+                }
+            }
+
+
+            // Initial Load
+            loadSidebarState();
+            renderSidebar(); // Render sidebar based on loaded or default state
+
+            if(currentlyDisplayedStock) {
+                loadStockData(currentlyDisplayedStock, '1M'); // Load data for the current or default stock
+            } else if (sidebarStocks.length === 0 || !sidebarStocks.some(s=>s.type === 'stock')) {
+                // Handle case where there are no stocks to display initially
+                // Perhaps show a welcome message or instructions
+                stockSymbolTitle.textContent = "Stock Tracker";
+                companyNameDisplay.textContent = "Add a stock to get started";
+                currentPriceDisplay.textContent = "$--.--";
+                priceChangeDisplay.textContent = "";
+                afterHoursDisplay.textContent = "";
+                if (chart) chart.destroy(); // Clear chart if no stock
+                // Clear details
+                Object.assign(aaplMockData, Object.fromEntries(Object.keys(aaplMockData).map(k => [k, (typeof aaplMockData[k] === 'string' && !['symbol', 'companyName', 'volume', 'marketCap'].includes(k) ? '--.--' : (typeof aaplMockData[k] === 'number' ? 0 : aaplMockData[k])) ])));
+                updateMainContent(aaplMockData); // Update with empty-like data
+            }
+            
+            // Set initial active time range button
+             chartControls.querySelector('button[data-range="1M"]').classList.add('active');
+
+        });
+    </script>
+</body>
+</html>
