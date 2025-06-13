@@ -79,7 +79,8 @@ header {
     left: 0;
     right: 0;
     padding: 1rem 2rem;
-    background: rgba(var(--bg-secondary), 0.8);
+    background-color: var(--bg-secondary);
+    /* using background-color instead of invalid rgba(var(--bg-secondary), 0.8) */
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     z-index: 100;
