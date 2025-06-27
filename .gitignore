@@ -1,0 +1,14 @@
+# Bundler dependencies
+/vendor/
+
+# Jekyll build output
+/_site/
+
+# Temporary files
+*.swp
+
+# Bundler configuration
+/.bundle/
+
+# Jekyll cache
+/.jekyll-cache/
