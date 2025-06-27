@@ -1,4 +1,4 @@
-var canvas, ctx, noteLabels, triadLabels;
+var canvas, ctx, noteLabels, triadLabels, midiPlayer;
 
 $(function(){
   canvas = document.getElementById("canvas");
@@ -13,6 +13,42 @@ $(function(){
   tonnetz.init();
   midi.init();
   keyboard.init('piano');
+
+  $('#midi-file').change(function(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    if(!file.name.toLowerCase().match(/\.midi?$/)) {
+      showError('Please select a MIDI file.');
+      $(this).val('');
+      return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        if (midiPlayer && midiPlayer.isPlaying()) {
+          midiPlayer.stop();
+        }
+        midiPlayer = new MidiPlayer.Player(function(evt) {
+          if (evt.name === 'Note on' && evt.velocity > 0) {
+            tonnetz.noteOn(0, evt.noteNumber);
+          } else if (evt.name === 'Note off' || (evt.name === 'Note on' && evt.velocity === 0)) {
+            tonnetz.noteOff(0, evt.noteNumber);
+          }
+        });
+        midiPlayer.on('endOfFile', function(){
+          showSuccess('Playback finished.');
+        });
+        midiPlayer.loadArrayBuffer(e.target.result);
+        midiPlayer.play();
+        showSuccess('Playing ' + file.name);
+      } catch(err) {
+        console.error(err);
+        showError('Failed to load MIDI file.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
 
   $('#tonnetz').mousewheel(function(event) {
     tonnetz.setDensity(tonnetz.density - event.deltaY);
