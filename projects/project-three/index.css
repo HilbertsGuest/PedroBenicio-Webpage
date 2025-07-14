@@ -1,0 +1,103 @@
+:root {
+  --background-color: #1a1a1d;
+  --torch-body-color: #c0c0c0;
+  --torch-handle-color: #4b5358;
+  --torch-nozzle-color: #b98a21;
+  --control-panel-bg: #2c2f33;
+  --text-color: #f0f0f0;
+  --button-bg: #4f545c;
+  --button-hover-bg: #6a7078;
+  --font-family: 'Roboto Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  background-image: radial-gradient(circle, #2a2a2d 0%, #1a1a1d 70%);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  max-width: 1000px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#simulation-container {
+  flex-grow: 1;
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  cursor: grab;
+}
+
+#simulation-container:active {
+    cursor: grabbing;
+}
+
+#controls {
+  width: 100%;
+  background-color: var(--control-panel-bg);
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+  border-top: 2px solid #444;
+  z-index: 20;
+  position: relative; /* Ensure it's on top of the 3D canvas */
+}
+
+#controls h2 {
+  margin: 0 0 15px 0;
+  font-weight: 400;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#element-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.element-button {
+  padding: 12px 24px;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  border-bottom: 3px solid rgba(0,0,0,0.3);
+}
+
+.element-button:hover {
+  background-color: var(--button-hover-bg);
+  transform: translateY(-2px);
+}
+
+.element-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
