@@ -4,30 +4,8 @@
  */
 import * as THREE from 'three';
 
-// --- Type Definitions ---
-interface Particle {
-  pos: THREE.Vector3;
-  vel: THREE.Vector3;
-  color: THREE.Color;
-  life: number;
-  initialLife: number;
-  size: number;
-}
-
-interface ElementData {
-  name: string;
-  color: string;
-  flameColors: string[];
-  sparks: {
-    enabled: boolean;
-    color?: string;
-    count?: number;
-  };
-  duration: number;
-}
-
 // --- Constants ---
-const ELEMENTS: Record<string, ElementData> = {
+const ELEMENTS = {
     // Original set, with Potassium colors adjusted to be more pink/lilac and Lithium sparks enabled
     COPPER: { name: "Copper", color: "#b87333", flameColors: ["#22dd22", "#11ccff", "#33ff55"], sparks: { enabled: true, color: "#55ff77", count: 25 }, duration: 3000 },
     LITHIUM: { name: "Lithium", color: "#d3d3d3", flameColors: ["#ff0055", "#ee0033", "#ff4477"], sparks: { enabled: true, color: "#ff69b4", count: 35 }, duration: 3000 },
@@ -59,26 +37,25 @@ const NOZZLE_TIP_Y = 0.85;
 const MAX_PARTICLES = 5000;
 
 // --- 3D Scene State ---
-let scene: THREE.Scene;
-let camera: THREE.PerspectiveCamera;
-let renderer: THREE.WebGLRenderer;
-let torch: THREE.Group;
-let flameParticles: Particle[] = [];
-let particleGeometry: THREE.BufferGeometry;
-let particleSystem: THREE.Points;
-let flameLight: THREE.PointLight;
-let activePellet: THREE.Mesh | null = null;
+let scene;
+let camera;
+let renderer;
+let torch;
+let flameParticles = [];
+let particleGeometry;
+let particleSystem;
+let flameLight;
+let activePellet = null;
 let pelletTargetTime = 0;
-let pelletDropCallback: (() => void) | null = null;
-
+let pelletDropCallback = null;
 
 // --- App State ---
 let currentFlameColors = [...DEFAULT_FLAME_COLORS];
-let reactionTimeout: number | null = null;
+let reactionTimeout = null;
 
 // --- DOM ---
-const controlsContainer = document.getElementById("element-buttons")!;
-const simulationContainer = document.getElementById("simulation-container") as HTMLElement;
+const controlsContainer = document.getElementById("element-buttons");
+const simulationContainer = document.getElementById("simulation-container");
 
 // --- Initialization ---
 function init() {
@@ -122,7 +99,7 @@ function init() {
 }
 
 // --- 3D Object Creation ---
-function createBlowtorch(): THREE.Group {
+function createBlowtorch() {
   const group = new THREE.Group();
 
   const nozzleMat = new THREE.MeshStandardMaterial({ color: 0xb98a21, metalness: 0.8, roughness: 0.3 });
@@ -171,7 +148,7 @@ function createParticleSystem() {
 }
 
 // --- Core Logic ---
-function createParticle(pos: THREE.Vector3, vel: THREE.Vector3, color: THREE.Color, size: number, life: number): Particle {
+function createParticle(pos, vel, color, size, life) {
   return { pos, vel, color, size, life, initialLife: life };
 }
 
@@ -190,7 +167,7 @@ function generateFlame() {
   }
 }
 
-function triggerReaction(element: ElementData) {
+function triggerReaction(element) {
   if (reactionTimeout) clearTimeout(reactionTimeout);
   
   currentFlameColors = element.flameColors;
@@ -221,7 +198,7 @@ function triggerReaction(element: ElementData) {
   }, element.duration);
 }
 
-function createPellet(element: ElementData) {
+function createPellet(element) {
     if(activePellet) return; // Only one pellet at a time
 
     const pelletGeom = new THREE.SphereGeometry(0.05, 16, 16);
@@ -254,9 +231,9 @@ function animate() {
 }
 
 function updateParticles() {
-    const positions = particleGeometry.attributes.position.array as Float32Array;
-    const colors = particleGeometry.attributes.color.array as Float32Array;
-    const sizes = particleGeometry.attributes.size.array as Float32Array;
+    const positions = particleGeometry.attributes.position.array;
+    const colors = particleGeometry.attributes.color.array;
+    const sizes = particleGeometry.attributes.size.array;
     
     let liveParticles = 0;
     flameParticles.forEach(p => {
@@ -293,7 +270,7 @@ function updateParticles() {
     particleGeometry.attributes.size.needsUpdate = true;
 }
 
-function updatePellet(now: number) {
+function updatePellet(now) {
     if (!activePellet) return;
 
     const targetPos = new THREE.Vector3(0, NOZZLE_TIP_Y + 0.1, 0);
@@ -309,7 +286,6 @@ function updatePellet(now: number) {
         }
     }
 }
-
 
 // --- UI and Event Handlers ---
 function initializeControls() {
