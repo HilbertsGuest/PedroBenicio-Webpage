@@ -52,10 +52,12 @@ let pelletDropCallback = null;
 // --- App State ---
 let currentFlameColors = [...DEFAULT_FLAME_COLORS];
 let reactionTimeout = null;
+let realisticGraphics = false;
 
 // --- DOM ---
 const controlsContainer = document.getElementById("element-buttons");
 const simulationContainer = document.getElementById("simulation-container");
+const graphicsToggle = document.getElementById("graphics-toggle");
 
 // --- Initialization ---
 function init() {
@@ -90,6 +92,7 @@ function init() {
   
   // Controls
   initializeControls();
+  initializeGraphicsToggle();
 
   // Event Listeners
   window.addEventListener("resize", onWindowResize);
@@ -129,10 +132,31 @@ function createParticleSystem() {
     const positions = new Float32Array(MAX_PARTICLES * 3);
     const colors = new Float32Array(MAX_PARTICLES * 3);
     const sizes = new Float32Array(MAX_PARTICLES);
+    const opacities = new Float32Array(MAX_PARTICLES);
 
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    particleGeometry.setAttribute('opacity', new THREE.BufferAttribute(opacities, 1));
+    
+    // Create realistic flame texture
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    
+    // Create radial gradient for flame particle
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.2, 'rgba(255, 200, 100, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(255, 100, 50, 0.4)');
+    gradient.addColorStop(0.8, 'rgba(255, 50, 0, 0.2)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+    
+    const flameTexture = new THREE.CanvasTexture(canvas);
     
     const particleMaterial = new THREE.PointsMaterial({
         size: 0.1,
@@ -141,6 +165,8 @@ function createParticleSystem() {
         transparent: true,
         depthWrite: false,
         sizeAttenuation: true,
+        map: flameTexture,
+        alphaTest: 0.001,
     });
 
     particleSystem = new THREE.Points(particleGeometry, particleMaterial);
@@ -155,6 +181,14 @@ function createParticle(pos, vel, color, size, life) {
 function generateFlame() {
   if (flameParticles.length >= MAX_PARTICLES) return;
 
+  if (realisticGraphics) {
+    generateRealisticFlame();
+  } else {
+    generateClassicFlame();
+  }
+}
+
+function generateClassicFlame() {
   const count = 5;
   for (let i = 0; i < count; i++) {
     const pos = new THREE.Vector3((Math.random() - 0.5) * 0.1, NOZZLE_TIP_Y, (Math.random() - 0.5) * 0.1);
@@ -167,13 +201,74 @@ function generateFlame() {
   }
 }
 
+function generateRealisticFlame() {
+  const count = 12; // More particles for realistic look
+  
+  // Core flame (blue/white hot center)
+  for (let i = 0; i < 3; i++) {
+    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.05, NOZZLE_TIP_Y, (Math.random() - 0.5) * 0.05);
+    const vel = new THREE.Vector3((Math.random() - 0.5) * 0.003, 0.025 + Math.random() * 0.015, (Math.random() - 0.5) * 0.003);
+    
+    // Hot core colors - blue to white
+    let color;
+    if (currentFlameColors === DEFAULT_FLAME_COLORS) {
+      color = new THREE.Color().setHSL(0.6 + Math.random() * 0.1, 0.8, 0.9); // Blue-white core
+    } else {
+      const colorStr = currentFlameColors[Math.floor(Math.random() * currentFlameColors.length)];
+      color = new THREE.Color(colorStr).multiplyScalar(1.2); // Brighter version
+    }
+    
+    const size = 8 + Math.random() * 6;
+    const life = 35 + Math.random() * 15;
+    flameParticles.push(createParticle(pos.clone(), vel, color, size, life));
+  }
+  
+  // Middle flame (orange/yellow)
+  for (let i = 0; i < 6; i++) {
+    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.08, NOZZLE_TIP_Y + Math.random() * 0.1, (Math.random() - 0.5) * 0.08);
+    const vel = new THREE.Vector3((Math.random() - 0.5) * 0.006, 0.018 + Math.random() * 0.012, (Math.random() - 0.5) * 0.006);
+    
+    let color;
+    if (currentFlameColors === DEFAULT_FLAME_COLORS) {
+      color = new THREE.Color().setHSL(0.1 + Math.random() * 0.1, 0.9, 0.7); // Orange-yellow
+    } else {
+      const colorStr = currentFlameColors[Math.floor(Math.random() * currentFlameColors.length)];
+      color = new THREE.Color(colorStr);
+    }
+    
+    const size = 12 + Math.random() * 8;
+    const life = 40 + Math.random() * 20;
+    flameParticles.push(createParticle(pos.clone(), vel, color, size, life));
+  }
+  
+  // Outer flame (red/orange tips)
+  for (let i = 0; i < 3; i++) {
+    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.12, NOZZLE_TIP_Y + Math.random() * 0.15, (Math.random() - 0.5) * 0.12);
+    const vel = new THREE.Vector3((Math.random() - 0.5) * 0.008, 0.012 + Math.random() * 0.008, (Math.random() - 0.5) * 0.008);
+    
+    let color;
+    if (currentFlameColors === DEFAULT_FLAME_COLORS) {
+      color = new THREE.Color().setHSL(0.05 + Math.random() * 0.05, 0.8, 0.5); // Red-orange tips
+    } else {
+      const colorStr = currentFlameColors[Math.floor(Math.random() * currentFlameColors.length)];
+      color = new THREE.Color(colorStr).multiplyScalar(0.8); // Darker version
+    }
+    
+    const size = 16 + Math.random() * 12;
+    const life = 50 + Math.random() * 25;
+    flameParticles.push(createParticle(pos.clone(), vel, color, size, life));
+  }
+}
+
 function triggerReaction(element) {
   if (reactionTimeout) clearTimeout(reactionTimeout);
   
   currentFlameColors = element.flameColors;
 
   if (element.sparks.enabled) {
-    for (let i = 0; i < (element.sparks.count || 5); i++) {
+    const sparkCount = realisticGraphics ? (element.sparks.count || 5) * 1.5 : (element.sparks.count || 5);
+    
+    for (let i = 0; i < sparkCount; i++) {
         if (flameParticles.length >= MAX_PARTICLES) continue;
         const pos = new THREE.Vector3(0, NOZZLE_TIP_Y, 0);
         const angle = Math.random() * Math.PI * 2;
@@ -185,9 +280,34 @@ function triggerReaction(element) {
             Math.sin(pitch) * speed + 0.025, // Upward boost
             Math.sin(angle) * Math.cos(pitch) * speed
         );
-        const color = new THREE.Color(element.sparks.color || "#ffffff");
-        const size = 10 + Math.random() * 5;
-        const life = 60 + Math.random() * 40;
+        
+        let color = new THREE.Color(element.sparks.color || "#ffffff");
+        let size, life;
+        
+        if (realisticGraphics) {
+          // More varied spark properties for realism
+          const sparkType = Math.random();
+          if (sparkType < 0.3) {
+            // Bright white-hot sparks
+            color = new THREE.Color(0xffffff);
+            size = 6 + Math.random() * 4;
+            life = 80 + Math.random() * 60;
+          } else if (sparkType < 0.7) {
+            // Medium temperature sparks
+            color = new THREE.Color(element.sparks.color || "#ffffff").multiplyScalar(0.9);
+            size = 8 + Math.random() * 6;
+            life = 60 + Math.random() * 40;
+          } else {
+            // Cooler, longer-lasting sparks
+            color = new THREE.Color(element.sparks.color || "#ffffff").multiplyScalar(0.7);
+            size = 12 + Math.random() * 8;
+            life = 100 + Math.random() * 80;
+          }
+        } else {
+          size = 10 + Math.random() * 5;
+          life = 60 + Math.random() * 40;
+        }
+        
         flameParticles.push(createParticle(pos, vel, color, size, life));
     }
   }
@@ -234,16 +354,16 @@ function updateParticles() {
     const positions = particleGeometry.attributes.position.array;
     const colors = particleGeometry.attributes.color.array;
     const sizes = particleGeometry.attributes.size.array;
+    const opacities = particleGeometry.attributes.opacity.array;
     
     let liveParticles = 0;
     flameParticles.forEach(p => {
         if (p.life > 0) {
-            p.pos.add(p.vel);
-            p.vel.y -= 0.00005; // Gravity effect
-            p.vel.x *= 0.98;
-            p.vel.z *= 0.98;
-
-            p.life--;
+            if (realisticGraphics) {
+                updateRealisticParticle(p);
+            } else {
+                updateClassicParticle(p);
+            }
             
             const lifeRatio = Math.max(0, p.life / p.initialLife);
             
@@ -251,12 +371,35 @@ function updateParticles() {
             positions[liveParticles * 3 + 1] = p.pos.y;
             positions[liveParticles * 3 + 2] = p.pos.z;
 
-            const currentColor = p.color.clone().multiplyScalar(lifeRatio);
+            let currentColor;
+            if (realisticGraphics) {
+                // More realistic color transitions
+                const temp = 1.0 - lifeRatio;
+                currentColor = p.color.clone();
+                
+                // Simulate temperature-based color changes
+                if (temp > 0.7) {
+                    currentColor.lerp(new THREE.Color(0x000000), (temp - 0.7) * 3);
+                } else if (temp > 0.4) {
+                    currentColor.lerp(new THREE.Color(0xff4400), (temp - 0.4) * 0.5);
+                }
+                
+                currentColor.multiplyScalar(lifeRatio * lifeRatio); // Non-linear fade
+            } else {
+                currentColor = p.color.clone().multiplyScalar(lifeRatio);
+            }
+            
             colors[liveParticles * 3] = currentColor.r;
             colors[liveParticles * 3 + 1] = currentColor.g;
             colors[liveParticles * 3 + 2] = currentColor.b;
 
-            sizes[liveParticles] = p.size * lifeRatio;
+            if (realisticGraphics) {
+                sizes[liveParticles] = p.size * (0.5 + lifeRatio * 0.5); // Less dramatic size change
+                opacities[liveParticles] = lifeRatio * lifeRatio; // Non-linear opacity fade
+            } else {
+                sizes[liveParticles] = p.size * lifeRatio;
+                opacities[liveParticles] = lifeRatio;
+            }
 
             liveParticles++;
         }
@@ -268,6 +411,37 @@ function updateParticles() {
     particleGeometry.attributes.position.needsUpdate = true;
     particleGeometry.attributes.color.needsUpdate = true;
     particleGeometry.attributes.size.needsUpdate = true;
+    particleGeometry.attributes.opacity.needsUpdate = true;
+}
+
+function updateClassicParticle(p) {
+    p.pos.add(p.vel);
+    p.vel.y -= 0.00005; // Gravity effect
+    p.vel.x *= 0.98;
+    p.vel.z *= 0.98;
+    p.life--;
+}
+
+function updateRealisticParticle(p) {
+    // More complex physics for realistic flames
+    p.pos.add(p.vel);
+    
+    // Buoyancy effect (hot air rises)
+    const buoyancy = 0.0002 * (1 - p.life / p.initialLife);
+    p.vel.y += buoyancy;
+    
+    // Turbulence for realistic flame movement
+    const turbulence = 0.001;
+    p.vel.x += (Math.random() - 0.5) * turbulence;
+    p.vel.z += (Math.random() - 0.5) * turbulence;
+    
+    // Air resistance
+    p.vel.multiplyScalar(0.985);
+    
+    // Slight gravity
+    p.vel.y -= 0.00002;
+    
+    p.life--;
 }
 
 function updatePellet(now) {
@@ -296,6 +470,32 @@ function initializeControls() {
     button.textContent = element.name;
     button.addEventListener("click", () => createPellet(element));
     controlsContainer.appendChild(button);
+  }
+}
+
+function initializeGraphicsToggle() {
+  graphicsToggle.addEventListener("click", () => {
+    realisticGraphics = !realisticGraphics;
+    graphicsToggle.textContent = `Realistic Graphics: ${realisticGraphics ? 'ON' : 'OFF'}`;
+    
+    // Update particle material when switching modes
+    updateParticleMaterial();
+  });
+}
+
+function updateParticleMaterial() {
+  if (realisticGraphics) {
+    // Enhanced material for realistic mode
+    particleSystem.material.size = 0.15;
+    particleSystem.material.opacity = 0.8;
+    flameLight.intensity = 1.5;
+    flameLight.distance = 15;
+  } else {
+    // Classic material
+    particleSystem.material.size = 0.1;
+    particleSystem.material.opacity = 1.0;
+    flameLight.intensity = 1.0;
+    flameLight.distance = 10;
   }
 }
 

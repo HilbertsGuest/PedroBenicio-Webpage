@@ -71,6 +71,34 @@ body {
   letter-spacing: 2px;
 }
 
+#graphics-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 0.9rem;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  border-bottom: 3px solid rgba(0,0,0,0.3);
+  z-index: 30;
+}
+
+#graphics-toggle:hover {
+  background-color: var(--button-hover-bg);
+  transform: translateY(-2px);
+}
+
+#graphics-toggle:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
 #element-buttons {
   display: flex;
   justify-content: center;
