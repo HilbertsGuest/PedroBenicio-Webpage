@@ -33,7 +33,7 @@ const ELEMENTS = {
 };
 
 const DEFAULT_FLAME_COLORS = ["#448aff", "#1976d2", "#ffeb3b", "#fbc02d", "#ff8f00"];
-const NOZZLE_TIP_Y = 0.85;
+const NOZZLE_TIP_Y = 1.1;
 const MAX_PARTICLES = 5000;
 
 // --- 3D Scene State ---
@@ -41,6 +41,7 @@ let scene;
 let camera;
 let renderer;
 let torch;
+let realisticTorch;
 let flameParticles = [];
 let particleGeometry;
 let particleSystem;
@@ -67,8 +68,8 @@ function init() {
   // Camera setup
   const aspect = simulationContainer.clientWidth / simulationContainer.clientHeight;
   camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
-  camera.position.set(0, 1.5, 3);
-  camera.lookAt(0, 0.5, 0);
+  camera.position.set(0, 2, 4);
+  camera.lookAt(0, 1, 0);
 
   // Renderer setup
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -83,10 +84,22 @@ function init() {
   flameLight = new THREE.PointLight(0xffaa33, 1, 10, 2);
   flameLight.position.set(0, NOZZLE_TIP_Y, 0);
   scene.add(flameLight);
+  
+  // Add additional lighting for realistic torch
+  const spotLight = new THREE.SpotLight(0xffffff, 0.5, 20, Math.PI / 6, 0.5);
+  spotLight.position.set(2, 3, 2);
+  spotLight.target.position.set(0, 0, 0);
+  scene.add(spotLight);
+  scene.add(spotLight.target);
 
   // Create objects
   torch = createBlowtorch();
+  realisticTorch = createRealisticBlowtorch();
   scene.add(torch);
+  scene.add(realisticTorch);
+  
+  // Initially hide realistic torch
+  realisticTorch.visible = false;
 
   createParticleSystem();
   
@@ -123,6 +136,117 @@ function createBlowtorch() {
   group.add(nozzle);
   group.add(body);
   group.add(handle);
+
+  return group;
+}
+
+function createRealisticBlowtorch() {
+  const group = new THREE.Group();
+
+  // Main body - larger and more detailed
+  const bodyMat = new THREE.MeshStandardMaterial({ 
+    color: 0x2a2a2a, 
+    metalness: 0.8, 
+    roughness: 0.3,
+    envMapIntensity: 1.0
+  });
+  const bodyGeom = new THREE.CylinderGeometry(0.15, 0.18, 1.2, 32);
+  const body = new THREE.Mesh(bodyGeom, bodyMat);
+  body.position.y = -0.1;
+  group.add(body);
+
+  // Fuel tank - realistic proportions
+  const tankMat = new THREE.MeshStandardMaterial({ 
+    color: 0x1a4d66, 
+    metalness: 0.9, 
+    roughness: 0.2 
+  });
+  const tankGeom = new THREE.CylinderGeometry(0.25, 0.25, 0.8, 24);
+  const tank = new THREE.Mesh(tankGeom, tankMat);
+  tank.position.y = -0.8;
+  group.add(tank);
+
+  // Nozzle assembly - more realistic
+  const nozzleMat = new THREE.MeshStandardMaterial({ 
+    color: 0x8b4513, 
+    metalness: 0.7, 
+    roughness: 0.4 
+  });
+  
+  // Main nozzle
+  const nozzleGeom = new THREE.CylinderGeometry(0.08, 0.12, 0.4, 16);
+  const nozzle = new THREE.Mesh(nozzleGeom, nozzleMat);
+  nozzle.position.y = 0.7;
+  group.add(nozzle);
+
+  // Nozzle tip - where flame comes out
+  const tipMat = new THREE.MeshStandardMaterial({ 
+    color: 0x654321, 
+    metalness: 0.9, 
+    roughness: 0.1 
+  });
+  const tipGeom = new THREE.CylinderGeometry(0.06, 0.08, 0.15, 12);
+  const tip = new THREE.Mesh(tipGeom, tipMat);
+  tip.position.y = 1.0;
+  group.add(tip);
+
+  // Gas control valve
+  const valveMat = new THREE.MeshStandardMaterial({ 
+    color: 0x444444, 
+    metalness: 0.6, 
+    roughness: 0.5 
+  });
+  const valveGeom = new THREE.CylinderGeometry(0.05, 0.05, 0.2, 8);
+  const valve = new THREE.Mesh(valveGeom, valveMat);
+  valve.position.set(0.2, 0.2, 0);
+  valve.rotation.z = Math.PI / 2;
+  group.add(valve);
+
+  // Trigger mechanism
+  const triggerMat = new THREE.MeshStandardMaterial({ 
+    color: 0x333333, 
+    metalness: 0.4, 
+    roughness: 0.6 
+  });
+  const triggerGeom = new THREE.BoxGeometry(0.08, 0.3, 0.15);
+  const trigger = new THREE.Mesh(triggerGeom, triggerMat);
+  trigger.position.set(0, -0.2, 0.15);
+  trigger.rotation.x = -0.3;
+  group.add(trigger);
+
+  // Safety guard around nozzle
+  const guardMat = new THREE.MeshStandardMaterial({ 
+    color: 0x666666, 
+    metalness: 0.8, 
+    roughness: 0.3 
+  });
+  const guardGeom = new THREE.TorusGeometry(0.15, 0.02, 8, 16);
+  const guard = new THREE.Mesh(guardGeom, guardMat);
+  guard.position.y = 0.5;
+  guard.rotation.x = Math.PI / 2;
+  group.add(guard);
+
+  // Fuel gauge
+  const gaugeMat = new THREE.MeshStandardMaterial({ 
+    color: 0xffffff, 
+    metalness: 0.1, 
+    roughness: 0.9 
+  });
+  const gaugeGeom = new THREE.CircleGeometry(0.08, 16);
+  const gauge = new THREE.Mesh(gaugeGeom, gaugeMat);
+  gauge.position.set(0, -0.5, 0.26);
+  group.add(gauge);
+
+  // Brand label/decal
+  const labelMat = new THREE.MeshStandardMaterial({ 
+    color: 0xff4444, 
+    metalness: 0.0, 
+    roughness: 0.8 
+  });
+  const labelGeom = new THREE.PlaneGeometry(0.3, 0.1);
+  const label = new THREE.Mesh(labelGeom, labelMat);
+  label.position.set(0, 0.1, 0.19);
+  group.add(label);
 
   return group;
 }
@@ -206,7 +330,7 @@ function generateRealisticFlame() {
   
   // Core flame (blue/white hot center)
   for (let i = 0; i < 3; i++) {
-    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.05, NOZZLE_TIP_Y, (Math.random() - 0.5) * 0.05);
+    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.04, NOZZLE_TIP_Y + 0.05, (Math.random() - 0.5) * 0.04);
     const vel = new THREE.Vector3((Math.random() - 0.5) * 0.003, 0.025 + Math.random() * 0.015, (Math.random() - 0.5) * 0.003);
     
     // Hot core colors - blue to white
@@ -225,7 +349,7 @@ function generateRealisticFlame() {
   
   // Middle flame (orange/yellow)
   for (let i = 0; i < 6; i++) {
-    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.08, NOZZLE_TIP_Y + Math.random() * 0.1, (Math.random() - 0.5) * 0.08);
+    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.08, NOZZLE_TIP_Y + 0.1 + Math.random() * 0.15, (Math.random() - 0.5) * 0.08);
     const vel = new THREE.Vector3((Math.random() - 0.5) * 0.006, 0.018 + Math.random() * 0.012, (Math.random() - 0.5) * 0.006);
     
     let color;
@@ -243,7 +367,7 @@ function generateRealisticFlame() {
   
   // Outer flame (red/orange tips)
   for (let i = 0; i < 3; i++) {
-    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.12, NOZZLE_TIP_Y + Math.random() * 0.15, (Math.random() - 0.5) * 0.12);
+    const pos = new THREE.Vector3((Math.random() - 0.5) * 0.12, NOZZLE_TIP_Y + 0.2 + Math.random() * 0.2, (Math.random() - 0.5) * 0.12);
     const vel = new THREE.Vector3((Math.random() - 0.5) * 0.008, 0.012 + Math.random() * 0.008, (Math.random() - 0.5) * 0.008);
     
     let color;
@@ -447,7 +571,7 @@ function updateRealisticParticle(p) {
 function updatePellet(now) {
     if (!activePellet) return;
 
-    const targetPos = new THREE.Vector3(0, NOZZLE_TIP_Y + 0.1, 0);
+    const targetPos = new THREE.Vector3(0, NOZZLE_TIP_Y + 0.15, 0);
     if (now < pelletTargetTime) {
         const progress = 1 - (pelletTargetTime - now) / 500;
         activePellet.position.lerp(targetPos, progress * 0.1); // Ease-out effect
@@ -490,12 +614,20 @@ function updateParticleMaterial() {
     particleSystem.material.opacity = 0.8;
     flameLight.intensity = 1.5;
     flameLight.distance = 15;
+    
+    // Switch to realistic torch model
+    torch.visible = false;
+    realisticTorch.visible = true;
   } else {
     // Classic material
     particleSystem.material.size = 0.1;
     particleSystem.material.opacity = 1.0;
     flameLight.intensity = 1.0;
     flameLight.distance = 10;
+    
+    // Switch to simple torch model
+    torch.visible = true;
+    realisticTorch.visible = false;
   }
 }
 
