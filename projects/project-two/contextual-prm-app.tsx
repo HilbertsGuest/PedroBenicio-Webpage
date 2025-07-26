@@ -1,16 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, User, Calendar, MessageCircle, Check, X, Edit, Search, Users, Brain, Clock, Tag } from 'lucide-react';
 
+// Type definitions
+interface Fact {
+  id: number;
+  type: string;
+  fact: string;
+  detail: string;
+  date: string;
+}
+
+interface Contact {
+  id: number;
+  name: string;
+  facts: Fact[];
+  lastInteraction: string;
+}
+
+interface Interaction {
+  id: number;
+  contactId: number;
+  date: string;
+  text: string;
+  extractedInsights: string[];
+}
+
+interface Insight {
+  id: number;
+  type: string;
+  fact: string;
+  detail: string;
+  confidence: number;
+  speaker: string;
+}
+
 const ContextualApp = () => {
-  const [contacts, setContacts] = useState([]);
-  const [interactions, setInteractions] = useState([]);
-  const [unassignedInsights, setUnassignedInsights] = useState([]);
-  const [currentView, setCurrentView] = useState('dashboard');
-  const [selectedContact, setSelectedContact] = useState(null);
-  const [newInteractionText, setNewInteractionText] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [pendingInsights, setPendingInsights] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [unassignedInsights, setUnassignedInsights] = useState<Insight[]>([]);
+  const [currentView, setCurrentView] = useState<string>('dashboard');
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [newInteractionText, setNewInteractionText] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [pendingInsights, setPendingInsights] = useState<Insight[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Sample data initialization
   useEffect(() => {
@@ -52,7 +85,7 @@ Yeah, been learning for a few months now. I just wanted to try something new aft
   }, []);
 
   // NLP Processing Function
-  const processInteractionText = (text) => {
+  const processInteractionText = (text: string) => {
     const insights = [];
     const currentDate = new Date();
     
@@ -144,7 +177,7 @@ Yeah, been learning for a few months now. I just wanted to try something new aft
     }, 1500);
   };
 
-  const confirmInsight = (insight, contactId = null) => {
+  const confirmInsight = (insight: Insight, contactId: number | null = null) => {
     if (contactId) {
       // Add to contact's facts
       setContacts(prev => prev.map(contact => 
@@ -179,7 +212,7 @@ Yeah, been learning for a few months now. I just wanted to try something new aft
     setPendingInsights(prev => prev.filter(i => i.id !== insight.id));
   };
 
-  const createNewContact = (name) => {
+  const createNewContact = (name: string) => {
     const newContact = {
       id: Date.now(),
       name,
@@ -190,7 +223,7 @@ Yeah, been learning for a few months now. I just wanted to try something new aft
     return newContact.id;
   };
 
-  const assignInsightToContact = (insight, contactId) => {
+  const assignInsightToContact = (insight: Insight, contactId: number) => {
     setContacts(prev => prev.map(contact => 
       contact.id === contactId 
         ? { ...contact, facts: [...contact.facts, { ...insight, date: new Date().toISOString().split('T')[0] }] }
@@ -199,7 +232,7 @@ Yeah, been learning for a few months now. I just wanted to try something new aft
     setUnassignedInsights(prev => prev.filter(i => i.id !== insight.id));
   };
 
-  const getTypeIcon = (type) => {
+  const getTypeIcon = (type: string) => {
     switch (type) {
       case 'Profile': return <User className="w-4 h-4" />;
       case 'Event': return <Calendar className="w-4 h-4" />;
@@ -209,7 +242,7 @@ Yeah, been learning for a few months now. I just wanted to try something new aft
     }
   };
 
-  const getTypeColor = (type) => {
+  const getTypeColor = (type: string) => {
     switch (type) {
       case 'Profile': return 'bg-blue-100 text-blue-800';
       case 'Event': return 'bg-green-100 text-green-800';
