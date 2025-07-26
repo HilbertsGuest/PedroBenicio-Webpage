@@ -1,22 +1,18 @@
 {
-  "name": "contextual-app",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "contextual-prm",
+  "version": "1.0.0",
+  "description": "Personal Relations Management System",
+  "main": "index.html",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "serve .",
+    "build": "echo 'No build process needed for static site'",
+    "deploy": "gh-pages -d ."
   },
-  "dependencies": {
-    "lucide-react": "^0.294.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
+  "keywords": ["prm", "crm", "relationship-management", "nlp"],
+  "author": "Your Name",
+  "license": "MIT",
   "devDependencies": {
-    "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
-    "@vitejs/plugin-react": "^4.1.1",
-    "vite": "^7.0.6"
+    "gh-pages": "^6.0.0",
+    "serve": "^14.2.1"
   }
 }
