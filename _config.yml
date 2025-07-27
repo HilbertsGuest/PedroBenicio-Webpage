@@ -5,14 +5,20 @@ description: A collection of web development projects and experiments
 # Exclude node_modules and other build artifacts from Jekyll processing
 exclude:
   - node_modules/
-  - projects/*/node_modules/
-  - projects/*/dist/
-  - "*.json"
-  - "*.config.js"
-  - "*.config.ts"
-  - README.md
-  - package-lock.json
-  - yarn.lock
+  - "projects/*/node_modules/"
+  - "projects/*/node_modules/**/*"
+  - "projects/*/dist/"
+  - "projects/**/package.json"
+  - "projects/**/package-lock.json"
+  - "projects/**/*.config.js"
+  - "projects/**/*.config.ts"
+  - "projects/**/tsconfig.json"
+  - "projects/**/yarn.lock"
+  - "projects/**/README.md"
+  - "projects/**/*.md"
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
 
 # GitHub Pages settings
 plugins:
