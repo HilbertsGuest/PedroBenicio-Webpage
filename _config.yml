@@ -1,0 +1,31 @@
+# Jekyll configuration for GitHub Pages
+title: Pedro Benicio's Portfolio
+description: A collection of web development projects and experiments
+
+# Exclude node_modules and other build artifacts from Jekyll processing
+exclude:
+  - node_modules/
+  - projects/*/node_modules/
+  - projects/*/dist/
+  - "*.json"
+  - "*.config.js"
+  - "*.config.ts"
+  - README.md
+  - package-lock.json
+  - yarn.lock
+
+# GitHub Pages settings
+plugins:
+  - jekyll-relative-links
+
+# Markdown settings
+markdown: kramdown
+highlighter: rouge
+
+# Site settings
+baseurl: ""
+url: "https://hilbertsguest.github.io"
+
+# Build settings
+safe: true
+incremental: false
