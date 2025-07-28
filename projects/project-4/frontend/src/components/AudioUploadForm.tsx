@@ -1,11 +1,21 @@
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { apiService } from '../services/apiService';
 
-const AudioUploadForm = ({ setResults }) => {
-  const [file, setFile] = useState(null);
+interface AudioUploadFormProps {
+  setResults: (results: any) => void;
+}
+
+const AudioUploadForm = ({ setResults }: AudioUploadFormProps) => {
+  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!file) return;
 
@@ -17,7 +27,7 @@ const AudioUploadForm = ({ setResults }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+      <input type="file" onChange={handleFileChange} />
       <button type="submit" disabled={loading}>
         {loading ? 'Analyzing...' : 'Analyze'}
       </button>

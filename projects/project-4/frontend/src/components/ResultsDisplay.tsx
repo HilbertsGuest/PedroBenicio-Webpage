@@ -1,6 +1,10 @@
 import Statement from './Statement';
 
-const ResultsDisplay = ({ results }) => {
+interface ResultsDisplayProps {
+  results: any[];
+}
+
+const ResultsDisplay = ({ results }: ResultsDisplayProps) => {
   return (
     <div>
       {results.map((result, index) => (

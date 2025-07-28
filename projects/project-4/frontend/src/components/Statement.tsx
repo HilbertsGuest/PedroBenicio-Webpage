@@ -1,4 +1,13 @@
-const Statement = ({ result }) => {
+interface StatementProps {
+  result: {
+    audioSlice: string;
+    text: string;
+    isTrue: boolean;
+    reasoning: string;
+  };
+}
+
+const Statement = ({ result }: StatementProps) => {
   const handleReplay = () => {
     const audio = new Audio(result.audioSlice);
     audio.play();

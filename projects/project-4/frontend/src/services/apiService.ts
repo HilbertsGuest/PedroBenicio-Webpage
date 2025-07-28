@@ -1,8 +1,8 @@
 // GHPages-Mock-Start
 import { mockApiResponse } from '../mocks/mockApi';
 
-const uploadAudio = async (file) => {
-  console.log('Using mock API response');
+const uploadAudio = async (file: File) => {
+  console.log('Using mock API response', file);
   return Promise.resolve(mockApiResponse);
 };
 
