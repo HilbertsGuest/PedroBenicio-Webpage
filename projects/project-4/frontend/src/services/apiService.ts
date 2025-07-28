@@ -1,20 +1,12 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3001/api/fact-check';
+// GHPages-Mock-Start
+import { mockApiResponse } from '../mocks/mockApi';
 
 const uploadAudio = async (file) => {
-  const formData = new FormData();
-  formData.append('audio', file);
-
-  const response = await axios.post(`${API_URL}/upload`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-
-  return response.data;
+  console.log('Using mock API response');
+  return Promise.resolve(mockApiResponse);
 };
 
 export const apiService = {
   uploadAudio,
 };
+// GHPages-Mock-End
