@@ -307,6 +307,32 @@
             display: none;
         }
 
+        /* Minimal glass effect for experiments mode only */
+        body.experiments-mode .glass-container {
+            background: rgba(2, 6, 23, 0.25);
+            backdrop-filter: blur(6px);
+            padding: 1rem;
+        }
+
+        body.experiments-mode .hero.glass-container {
+            background: rgba(2, 6, 23, 0.30);
+            backdrop-filter: blur(8px);
+            padding: 2rem 1rem;
+        }
+
+        /* Light text colors for experiments mode */
+        body.experiments-mode .hero h1,
+        body.experiments-mode .section-title,
+        body.experiments-mode .hero p,
+        body.experiments-mode .logo,
+        body.experiments-mode .mode-label {
+            color: #F8FAFC;
+        }
+
+        body.experiments-mode footer p {
+            color: #CBD5E1;
+        }
+
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
