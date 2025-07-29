@@ -45,11 +45,44 @@
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
-            transition: all 0.3s ease;
+            transition: all 1s ease;
             background-image: url('https://images.unsplash.com/photo-1553095066-5014bc7b7f2d?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+        }
+
+        /* Experiments mode background */
+        body.experiments-mode {
+            background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Graffiti overlay for experiments mode */
+        body.experiments-mode::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><text x="50" y="80" font-family="Arial Black" font-size="24" fill="%23ff6b6b" transform="rotate(-15)">CODE</text><text x="200" y="150" font-family="Arial Black" font-size="18" fill="%2300d4ff" transform="rotate(10)">EXPERIMENT</text><text x="100" y="200" font-family="Arial Black" font-size="20" fill="%234ecdc4" transform="rotate(-8)">CREATE</text><text x="280" y="100" font-family="Arial Black" font-size="16" fill="%23ff9f43" transform="rotate(12)">INNOVATE</text><text x="150" y="250" font-family="Arial Black" font-size="22" fill="%23a55eea" transform="rotate(-12)">BUILD</text></svg>'),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200"><circle cx="80" cy="60" r="25" fill="none" stroke="%23ff6b6b" stroke-width="3"/><path d="M150 50 L180 80 L150 110 L120 80 Z" fill="none" stroke="%2300d4ff" stroke-width="2"/><text x="200" y="150" font-family="Arial Black" font-size="14" fill="%234ecdc4">DEV</text></svg>');
+            background-repeat: no-repeat, no-repeat;
+            background-position: 20% 30%, 70% 60%;
+            background-size: 300px 200px, 200px 150px;
+            opacity: 0.7;
+            animation: graffitiFloat 15s ease-in-out infinite;
+        }
+
+        @keyframes graffitiFloat {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-10px) translateX(5px); }
+            50% { transform: translateY(5px) translateX(-3px); }
+            75% { transform: translateY(-5px) translateX(8px); }
         }
 
         .glass-container {
@@ -670,6 +703,9 @@
         function toggleMode() {
             isExperimentMode = !isExperimentMode;
             modeSwitch.classList.toggle('active');
+            
+            // Toggle experiments mode class for background morphing
+            document.body.classList.toggle('experiments-mode', isExperimentMode);
             
             const content = isExperimentMode ? experimentsContent : portfolioContent;
             const modeText = isExperimentMode ? 'Experiments' : 'Portfolio';
