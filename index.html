@@ -92,17 +92,17 @@
         }
 
         .glass-container {
-            background: var(--section-scrim);
-            backdrop-filter: blur(10px) brightness(0.82) saturate(0.9);
+            background: transparent;
+            backdrop-filter: none;
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.15);
+            border: none;
+            box-shadow: none;
         }
 
-        /* Hero section gets stronger scrim */
+        /* Hero section gets same transparent treatment */
         .hero.glass-container {
-            background: var(--hero-scrim);
-            backdrop-filter: blur(12px) brightness(0.80) saturate(0.85);
+            background: transparent;
+            backdrop-filter: none;
         }
 
         /* Animated background */
@@ -143,9 +143,9 @@
             left: 0;
             right: 0;
             padding: 1rem 2rem;
-            background: var(--nav-bg);
-            backdrop-filter: blur(12px) brightness(0.82) saturate(0.9);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            backdrop-filter: none;
+            border-bottom: none;
             z-index: 100;
             transition: all 0.3s ease;
         }
@@ -468,9 +468,9 @@
 
         /* Footer */
         footer {
-            background: var(--section-scrim);
-            backdrop-filter: blur(10px) brightness(0.82) saturate(0.9);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            backdrop-filter: none;
+            border-top: none;
             padding: 2rem;
             text-align: center;
             color: var(--text-muted);
