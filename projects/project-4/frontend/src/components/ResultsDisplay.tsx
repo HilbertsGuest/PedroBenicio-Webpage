@@ -6,7 +6,7 @@ interface ResultsDisplayProps {
 
 const ResultsDisplay = ({ results }: ResultsDisplayProps) => {
   return (
-    <div>
+    <div className="mt-8">
       {results.map((result, index) => (
         <Statement key={index} result={result} />
       ))}

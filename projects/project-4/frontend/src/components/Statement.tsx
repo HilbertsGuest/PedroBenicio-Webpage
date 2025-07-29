@@ -14,13 +14,13 @@ const Statement = ({ result }: StatementProps) => {
   };
 
   return (
-    <div style={{ border: '1px solid black', margin: '10px', padding: '10px' }}>
-      <p>{result.text}</p>
-      <p style={{ color: result.isTrue ? 'green' : 'red' }}>
+    <div className="border rounded-lg p-4 my-4 shadow-md">
+      <p className="text-lg">{result.text}</p>
+      <p className={`text-xl font-bold ${result.isTrue ? 'text-green-500' : 'text-red-500'}`}>
         {result.isTrue ? 'True' : 'False'}
       </p>
-      <p>{result.reasoning}</p>
-      <button onClick={handleReplay}>Replay</button>
+      <p className="text-gray-700">{result.reasoning}</p>
+      <button onClick={handleReplay} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Replay</button>
     </div>
   );
 };
