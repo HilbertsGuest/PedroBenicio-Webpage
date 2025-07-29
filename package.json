@@ -1,0 +1,26 @@
+{
+  "name": "pedrobenicio-webpage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "build:css": "node_modules\.bin\tailwindcss -i tailwind.css -o style.css",
+    "postinstall": "npm run build:css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HilbertsGuest/PedroBenicio-Webpage.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/HilbertsGuest/PedroBenicio-Webpage/issues"
+  },
+  "homepage": "https://github.com/HilbertsGuest/PedroBenicio-Webpage#readme",
+  "devDependencies": {
+    "tailwindcss": "^4.1.11"
+  }
+}
