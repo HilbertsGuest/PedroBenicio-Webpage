@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  font-family: sans-serif;
+  background-image: linear-gradient(to right, #74ebd5, #acb6e5);
 }
 
 #root {
@@ -11,4 +11,12 @@ body {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+.glass-button {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }

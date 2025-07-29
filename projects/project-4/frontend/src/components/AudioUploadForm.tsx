@@ -28,7 +28,7 @@ const AudioUploadForm = ({ setResults }: AudioUploadFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4">
       <input type="file" onChange={handleFileChange} className="p-2 border rounded" />
-      <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400">
+      <button type="submit" disabled={loading} className="px-4 py-2 text-white rounded-full glass-button">
         {loading ? 'Analyzing...' : 'Analyze'}
       </button>
     </form>
