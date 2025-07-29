@@ -46,6 +46,18 @@
             line-height: 1.6;
             overflow-x: hidden;
             transition: all 0.3s ease;
+            background-image: url('https://images.unsplash.com/photo-1553095066-5014bc7b7f2d?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
         /* Animated background */
@@ -454,7 +466,7 @@
 <body>
     <div class="bg-animation"></div>
     
-    <header>
+    <header class="glass-container">
         <nav>
             <div class="logo">Portfolio</div>
             <div class="mode-switch">
@@ -465,7 +477,7 @@
     </header>
 
     <main>
-        <section class="hero">
+        <section class="hero glass-container">
             <div class="hero-content">
                 <h1 id="heroTitle">Welcome to Pedro Benicio's Portfolio</h1>
                 <p id="heroDescription">Discover my latest projects, experiments, and creative explorations in web development, design, and technology.</p>
@@ -476,7 +488,7 @@
             </div>
         </section>
 
-        <section class="projects" id="projects">
+        <section class="projects glass-container" id="projects">
             <h2 class="section-title" id="sectionTitle">Featured Projects</h2>
             <div class="projects-grid" id="projectsGrid">
                 <!-- Example project cards - replace with your actual projects -->
@@ -549,7 +561,7 @@
             </div>
         </section>
 
-        <section class="audio-player">
+        <section class="audio-player glass-container">
             <button id="playPauseBtn" aria-label="Play">▶️</button>
             <div class="progress-container" id="progressContainer">
                 <div class="progress-bar" id="progressBar"></div>
@@ -558,7 +570,7 @@
         </section>
     </main>
 
-    <footer>
+    <footer class="glass-container">
         <div class="social-links">
             <a href="#" class="social-link" title="GitHub">
                 <span>🐙</span>
