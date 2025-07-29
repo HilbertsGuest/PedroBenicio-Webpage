@@ -6,7 +6,7 @@ export default defineConfig({
   // GHPages-Base-Config
   base: './',
   build: {
-    outDir: 'build'
+    outDir: 'dist'
   },
   plugins: [react()],
 })
