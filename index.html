@@ -15,18 +15,19 @@
             --bg-primary: #0a0a0a;
             --bg-secondary: #111111;
             --bg-tertiary: #1a1a1a;
-            --text-primary: #F8FAFC;
+            --text-primary: #FFFFFF;
             --text-secondary: #E2E8F0;
-            --text-muted: #94A3B8;
+            --text-muted: #CBD5E1;
             --accent: #3B82F6;
             --accent-hover: #2563EB;
             --accent-focus: #93C5FD;
             --border: #333333;
             --shadow: rgba(0, 0, 0, 0.3);
             --glow: rgba(59, 130, 246, 0.3);
-            --dark-scrim: rgba(2, 6, 23, 0.55);
-            --dark-scrim-light: rgba(2, 6, 23, 0.30);
-            --nav-bg: rgba(2, 6, 23, 0.70);
+            --hero-scrim: rgba(2, 6, 23, 0.60);
+            --section-scrim: rgba(2, 6, 23, 0.52);
+            --section-scrim-light: rgba(2, 6, 23, 0.30);
+            --nav-bg: rgba(2, 6, 23, 0.65);
             --toggle-track: #334155;
         }
 
@@ -91,11 +92,17 @@
         }
 
         .glass-container {
-            background: var(--dark-scrim);
-            backdrop-filter: blur(8px) brightness(0.85);
+            background: var(--section-scrim);
+            backdrop-filter: blur(10px) brightness(0.82) saturate(0.9);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        /* Hero section gets stronger scrim */
+        .hero.glass-container {
+            background: var(--hero-scrim);
+            backdrop-filter: blur(12px) brightness(0.80) saturate(0.85);
         }
 
         /* Animated background */
@@ -137,7 +144,7 @@
             right: 0;
             padding: 1rem 2rem;
             background: var(--nav-bg);
-            backdrop-filter: blur(20px) brightness(0.85);
+            backdrop-filter: blur(12px) brightness(0.82) saturate(0.9);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 100;
             transition: all 0.3s ease;
@@ -154,7 +161,7 @@
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #FFFFFF;
         }
 
         .mode-switch {
@@ -165,8 +172,12 @@
 
         .mode-label {
             font-weight: 600;
-            color: var(--text-secondary);
+            color: #E2E8F0;
             transition: all 0.3s ease;
+        }
+
+        .mode-label:hover {
+            color: #FFFFFF;
         }
 
         .switch {
@@ -238,7 +249,7 @@
             font-weight: 800;
             margin-bottom: 1rem;
             color: var(--text-primary);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
         }
 
         .hero p {
@@ -285,25 +296,24 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 3rem;
-            color: var(--text-primary);
+            color: #F8FAFC;
             position: relative;
             display: inline-block;
             width: 100%;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
         }
 
         .section-title::before {
             content: '';
             position: absolute;
-            top: 0;
+            top: -0.5rem;
             left: 50%;
             transform: translateX(-50%);
-            width: fit-content;
-            min-width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, var(--dark-scrim) 0%, var(--dark-scrim-light) 100%);
+            width: calc(100% + 4rem);
+            height: calc(100% + 1rem);
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.60) 0%, rgba(2, 6, 23, 0.30) 100%);
             border-radius: 12px;
             z-index: -1;
-            padding: 0.5rem 2rem;
         }
 
         .projects-grid {
@@ -317,7 +327,7 @@
             background: #FFFFFF;
             border-radius: 20px;
             padding: 2rem;
-            border: 1px solid rgba(2, 6, 23, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -457,8 +467,8 @@
 
         /* Footer */
         footer {
-            background: var(--dark-scrim);
-            backdrop-filter: blur(8px) brightness(0.85);
+            background: var(--section-scrim);
+            backdrop-filter: blur(10px) brightness(0.82) saturate(0.9);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 2rem;
             text-align: center;
