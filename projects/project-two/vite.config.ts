@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [react()],
   base: './', // Important for GitHub Pages deployment
   build: {
-    outDir: 'dist',
+    // Emit directly into docs/ so GitHub Pages (docs root) can serve it
+    outDir: '../../docs/projects/project-two',
     assetsDir: 'assets',
   }
 })
