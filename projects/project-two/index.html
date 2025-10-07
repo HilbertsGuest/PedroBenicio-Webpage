@@ -10,14 +10,29 @@
   <body>
     <div id="root">
       <div style="padding:16px;font-family:Inter,system-ui,Arial,sans-serif;color:#334155">
-        Loading… If this stays blank, please open via a local server
-        (run `npm run preview`) or GitHub Pages instead of directly
-        opening the file from disk.
+        Loading… If this stays blank on GitHub Pages, assets may not be deployed.
       </div>
-      <noscript>
-        This demo requires JavaScript to run.
-      </noscript>
+      <noscript>This demo requires JavaScript to run.</noscript>
     </div>
+    <script>window.__APP_BOOTED__ = false;</script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      setTimeout(function(){
+        if(!window.__APP_BOOTED__){
+          var root = document.getElementById('root');
+          if(root){
+            root.innerHTML = '<div style="padding:16px;font-family:Inter,system-ui,Arial,sans-serif;color:#334155">\
+              Could not start the app.\
+              <br/><br/>Common causes on GitHub Pages:\
+              <ul style="margin:8px 0 0 16px;">\
+                <li>The built files in <code>projects/project-two/dist</code> (especially the <code>assets/</code> folder) are not published.</li>\
+                <li>The link path is wrong. It should be <code>projects/project-two/dist/index.html</code> within your site.</li>\
+              </ul>\
+              <br/>Try rebuilding locally (\<code>npm run build\</code>) and ensure the <code>dist/</code> contents are committed and deployed.\
+            </div>';
+          }
+        }
+      }, 2500);
+    </script>
   </body>
 </html>

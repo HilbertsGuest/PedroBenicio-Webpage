@@ -8,3 +8,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <App />
   </React.StrictMode>,
 )
+
+// Signal boot success for static hosts diagnostic
+// @ts-ignore
+;(window as any).__APP_BOOTED__ = true
