@@ -7,7 +7,7 @@ export default defineConfig({
   base: './', // Important for GitHub Pages deployment
   build: {
     // Emit directly into docs/ so GitHub Pages (docs root) can serve it
-    outDir: '../../docs/projects/project-two',
+    outDir: 'dist',
     assetsDir: 'assets',
   }
 })
